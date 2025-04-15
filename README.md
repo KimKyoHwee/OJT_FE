@@ -4,6 +4,10 @@
 
 ## 기능
 
+- 사용자 인증 (JWT 기반)
+  - 로그인/로그아웃
+  - 토큰 자동 갱신
+  - 인증 상태 유지
 - 배치 작업 목록 조회 및 관리
 - 실시간 작업 상태 모니터링
 - 작업 즉시 실행 기능
@@ -16,6 +20,7 @@
 - **상태 관리**: TanStack Query (React Query)
 - **스타일링**: Tailwind CSS
 - **HTTP 클라이언트**: Axios
+- **인증**: JWT (Access Token + Refresh Token)
 - **백엔드**: Spring Boot (8080 포트)
 
 ## 프로젝트 구조
@@ -23,20 +28,45 @@
 ```
 src/
 ├── app/
-│   └── page.tsx           # 메인 페이지 (Next.js App Router 진입점)
+│   ├── layout.tsx        # 전체 레이아웃
+│   └── page.tsx         # 메인 페이지
 │
 ├── components/
-│   ├── JobList.tsx        # 작업 목록 테이블 컴포넌트
-│   └── JobStats.tsx       # 통계 대시보드 컴포넌트
+│   ├── auth/
+│   │   └── LoginForm.tsx # 로그인 폼 컴포넌트
+│   ├── JobList.tsx      # 작업 목록 테이블 컴포넌트
+│   └── JobStats.tsx     # 통계 대시보드 컴포넌트
+│
+├── hooks/
+│   └── useAuth.ts       # 인증 관련 커스텀 훅
 │
 ├── services/
-│   └── jobService.ts      # API 통신 서비스
+│   ├── authService.ts   # 인증 관련 API 서비스
+│   └── jobService.ts    # 작업 관리 API 서비스
 │
 └── types/
-    └── job.ts            # TypeScript 타입 정의
+    ├── auth.ts         # 인증 관련 타입 정의
+    └── job.ts          # 작업 관련 타입 정의
 ```
 
 ### 주요 컴포넌트 설명
+
+#### LoginForm.tsx
+- JWT 기반 사용자 인증
+- 로그인 상태 관리
+- 에러 처리 및 사용자 피드백
+
+#### useAuth.ts
+- 인증 상태 관리 훅
+- 토큰 자동 갱신
+- 로그인/로그아웃 처리
+- 보호된 라우트 처리
+
+#### authService.ts
+- JWT 인증 처리
+- Access Token 및 Refresh Token 관리
+- 인터셉터를 통한 토큰 갱신
+- 사용자 정보 조회
 
 #### JobList.tsx
 - 배치 작업 목록을 테이블 형태로 표시
@@ -75,6 +105,12 @@ npm start
 
 기본 URL: `http://localhost:8080/api`
 
+### 인증
+- `POST /auth/login` - 로그인
+- `POST /auth/logout` - 로그아웃
+- `POST /auth/refresh` - 토큰 갱신
+- `GET /auth/me` - 현재 사용자 정보 조회
+
 ### 작업 관리
 - `GET /jobs` - 전체 작업 목록 조회
 - `GET /jobs/stats` - 작업 통계 조회
@@ -87,6 +123,11 @@ npm start
 
 ### 환경 변수
 - `NEXT_PUBLIC_API_URL`: API 서버 주소 (기본값: http://localhost:8080/api)
+
+### 인증 설정
+- JWT 토큰 저장소: localStorage
+- Access Token 만료 시 자동 갱신
+- 보호된 라우트에 대한 인증 확인
 
 ### TypeScript 설정
 - Path Alias: `@/*` → `src/*`
