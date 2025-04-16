@@ -1,13 +1,8 @@
 export interface BatchJob {
-  id: string;
-  name: string;
-  status: 'RUNNING' | 'COMPLETED' | 'FAILED' | 'PENDING';
-  schedule: string;
-  lastRun?: string;
-  nextRun?: string;
-  apiEndpoint: string;
-  createdAt: string;
-  updatedAt: string;
+  id: number; // id를 number로 변경
+  name: string; // Job 이름
+  description: string; // Job 설명
+  endpointUrl: string; // Job 실행 엔드포인트 URL
 }
 
 export interface JobStats {

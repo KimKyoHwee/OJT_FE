@@ -1,43 +1,33 @@
-// src/components/auth/LoginForm.tsx
-
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { LoginCredentials, AuthError } from '@/types/auth';
+import { useLogin } from '@/hooks/useLogin';
+
+interface AuthError {
+  message: string;
+  code?: string;
+}
 
 export const LoginForm: React.FC = () => {
-  const router = useRouter();
-  const [credentials, setCredentials] = useState<LoginCredentials>({
+  const { login, isLoading, error } = useLogin(); // useLogin 훅에서 로그인 함수 불러오기
+  const [credentials, setCredentials] = useState({
     username: '',
     password: '',
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<AuthError | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCredentials(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-    
-    // 실제 로그인 로직은 useAuth 훅에서 구현할 예정
     try {
-      // await login(credentials);
-      router.push('/');
+      await login({ ...credentials, id: 0 }); // id 값을 추가하여 login 함수 호출
     } catch (err) {
-      setError({
-        message: '로그인에 실패했습니다.',
-        code: 'INVALID_CREDENTIALS'
-      });
-    } finally {
-      setIsLoading(false);
+      console.error(err); // 추가적인 에러 처리 가능
     }
   };
 
@@ -82,12 +72,12 @@ export const LoginForm: React.FC = () => {
             </div>
           </div>
 
-          {error && (
+          {error && typeof error === 'object' && (
             <div className="rounded-md bg-red-50 p-4">
               <div className="flex">
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-red-800">
-                    {error.message}
+                    'message' in error ? error.message : '알 수 없는 에러가 발생했습니다.'
                   </h3>
                 </div>
               </div>

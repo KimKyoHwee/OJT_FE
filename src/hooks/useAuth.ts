@@ -23,6 +23,7 @@ export const useAuth = () => {
       
       if (!accessToken) {
         setState(prev => ({ ...prev, isLoading: false }));
+        router.push('/login'); // 로그인 페이지로 리다이렉트
         return;
       }
 
@@ -43,11 +44,12 @@ export const useAuth = () => {
           isLoading: false,
           error: null,
         });
+        router.push('/login'); // 로그인 페이지로 리다이렉트
       }
     };
 
     checkAuth();
-  }, []);
+  }, [router]);
 
   const login = async (credentials: LoginCredentials) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
