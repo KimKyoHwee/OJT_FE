@@ -1,55 +1,69 @@
 'use client';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { JobList } from '@/components/JobList';
-import { AllJobs } from '@/components/JobStats'; // JobStats를 AllJobs로 변경
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AddJobModal } from '@/components/AddJobModal';
+import { AllJobs } from '@/components/AllJobs';
+import { JobList } from '@/components/JobList';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchInterval: 5000, // 5초마다 데이터 자동 갱신
+      refetchInterval: 5000,
       staleTime: 1000,
     },
   },
 });
 
-export default function Home() {
+function AuthenticatedHome() {
+  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
-    // localStorage에서 authenticated 값 확인
     const authenticated = localStorage.getItem('authenticated') === 'true';
-    console.log('Authenticated from localStorage:', authenticated);
-
     if (!authenticated) {
-      console.log('User is not authenticated, redirecting to login page...');
-      router.push('/login'); // 로그인 페이지로 리다이렉트
+      router.push('/login');
     } else {
       setIsAuthenticated(true);
     }
-
-    setIsLoading(false); // 로딩 상태 해제
+    setIsLoading(false);
   }, [router]);
 
-  if (isLoading) {
-    return <div>Loading...</div>; // 로딩 상태 표시
-  }
+  const handleLogout = () => {
+    localStorage.removeItem('authenticated');
+    router.push('/login');
+  };
 
-  if (!isAuthenticated) {
-    return null; // 인증되지 않은 경우 아무것도 렌더링하지 않음
-  }
+  if (isLoading) return <div className="text-center text-gray-500 mt-20">불러오는 중...</div>;
+  if (!isAuthenticated) return null;
 
   return (
+    <main className="max-w-3xl mx-auto px-4 py-10">
+      <header className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold text-gray-900 mb-1">배치 작업 관리</h1>
+          <p className="text-gray-500 text-sm">등록된 작업을 조회하고 실행할 수 있어요.</p>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="text-sm text-gray-500 hover:text-red-500 transition font-medium"
+        >
+          로그아웃
+        </button>
+      </header>
+      <AddJobModal />
+      <AllJobs />
+      <JobList />
+    </main>
+  );
+}
+
+export default function Home() {
+  return (
     <QueryClientProvider client={queryClient}>
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Batch Job Management</h1>
-        <AllJobs /> {/* AllJobs 컴포넌트로 변경 */}
-        <JobList />
-      </main>
+      <AuthenticatedHome />
     </QueryClientProvider>
   );
 }

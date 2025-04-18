@@ -18,3 +18,9 @@ export interface JobError {
   jobId: string;
   details?: string;
 } 
+
+export interface BatchLog {
+  status: 'SUCCESS' | 'FAIL';
+  message: string;
+  executedAt: string;
+}

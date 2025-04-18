@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { BatchJob, JobStats } from '@/types/job';
+import { BatchJob, JobStats, BatchLog } from '@/types/job';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 
@@ -48,5 +48,20 @@ export const jobService = {
   // Job 삭제
   async deleteJob(jobId: string): Promise<void> {
     await axios.delete(`${API_BASE_URL}/jobs/${jobId}`);
-  }
+  },
+ 
+  async updateJob(jobId: string, updatedData: Partial<BatchJob>): Promise<BatchJob> {
+    const response = await axios.patch<BatchJob>(`${API_BASE_URL}/jobs/${jobId}`, updatedData);
+    return response.data;
+  },
+
+  // logs 조회
+async getJobLogs(jobId: string): Promise<BatchLog[]> {
+  const response = await axios.get<{ statusCode: string; message: string; content: BatchLog[] }>(
+    `${API_BASE_URL}/logs/job/${jobId}`
+  );
+  return response.data.content;
+}
+
+  
 };
