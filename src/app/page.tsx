@@ -32,9 +32,11 @@ function AuthenticatedHome() {
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('authenticated');
-    router.push('/login');
+    localStorage.removeItem('authenticated'); // 인증 상태 제거
+    localStorage.removeItem('userId');        // 사용자 ID 제거
+    router.push('/login');                    // 로그인 화면으로 이동
   };
+  
 
   if (isLoading) return <div className="text-center text-gray-500 mt-20">불러오는 중...</div>;
   if (!isAuthenticated) return null;

@@ -1,9 +1,13 @@
 export interface BatchJob {
-  id: number; // id를 number로 변경
-  name: string; // Job 이름
-  description: string; // Job 설명
-  endpointUrl: string; // Job 실행 엔드포인트 URL
+  id: number;
+  name: string;
+  description: string;
+  endpointUrl: string;
+  userId: number;
+  createdAt: string;     // ISO 문자열 (예: '2025-04-19T02:00:00')
+  updatedAt: string;
 }
+
 
 export interface JobStats {
   totalJobs: number;
@@ -24,3 +28,14 @@ export interface BatchLog {
   message: string;
   executedAt: string;
 }
+
+// types/job.ts
+export interface CreateJobRequest {
+  name: string;
+  description?: string;
+  endpointUrl: string;
+  userId: number;
+  scheduleTime: string;            // ISO 형식 문자열
+  repeatIntervalMinutes?: number;  // 선택 값 (단발성도 가능)
+}
+

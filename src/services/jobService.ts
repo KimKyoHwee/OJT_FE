@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { BatchJob, JobStats, BatchLog } from '@/types/job';
+import { BatchJob, JobStats, BatchLog, CreateJobRequest } from '@/types/job';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 
@@ -28,8 +28,9 @@ export const jobService = {
   },
 
   // 새로운 Job 생성
-  async createJob(jobData: Omit<BatchJob, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<BatchJob> {
-    const response = await axios.post<BatchJob>(`${API_BASE_URL}/jobs`, jobData);
+  async createJob(jobData: CreateJobRequest): Promise<BatchJob> {
+    console.log(localStorage.getItem('userId')); // 값이 null 또는 '' 이라면 오류 발생함
+    const response = await axios.post<BatchJob>(`${API_BASE_URL}/batch-job`, jobData);
     return response.data;
   },
 
