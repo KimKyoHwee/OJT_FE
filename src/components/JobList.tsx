@@ -1,13 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { jobService } from '@/services/jobService';
-import { BatchJob } from '@/types/job';
+import { BatchJob, BatchJobListDto } from '@/types/job';
 import { EditJobModal } from '@/components/EditJobModal';
 import { JobLogsModal } from '@/components/JobLogsModal';
 
-
 export const JobList = () => {
   const queryClient = useQueryClient();
-  const { data = [], isLoading } = useQuery<BatchJob[]>({
+  const { data = [], isLoading } = useQuery<BatchJobListDto[]>({
     queryKey: ['jobs'],
     queryFn: jobService.getAllJobs,
   });
@@ -22,12 +21,14 @@ export const JobList = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['jobs'] }),
   });
 
+  const storedUserId = Number(localStorage.getItem('userId') || '');
+
   if (isLoading) return <div className="text-gray-500">작업 목록을 불러오는 중...</div>;
 
   return (
     <div className="space-y-4">
       {data.map((job) => (
-        <div key={job.id} className="p-5 bg-white border border-gray-200 rounded-xl shadow-sm">
+        <div key={job.batchJobId} className="p-5 bg-white border border-gray-200 rounded-xl shadow-sm">
           <h3 className="text-lg font-medium text-gray-900">{job.name}</h3>
           <p className="text-sm text-gray-500 mb-2">{job.description}</p>
           <a
@@ -41,22 +42,32 @@ export const JobList = () => {
 
           <div className="mt-4 flex gap-3">
             <button
-              onClick={() => runJobMutation.mutate(String(job.id))}
+              onClick={() => runJobMutation.mutate(String(job.batchJobId))}
               className="text-indigo-600 hover:underline"
             >
               즉시 실행
             </button>
 
+            {/* ✅ jobId와 job을 같이 넘겨줌 */}
             <EditJobModal
-              job={job}
+              jobId={job.batchJobId}
+              job={{
+                name: job.name,
+                description: job.description,
+                endpointUrl: job.endpointUrl,
+                userId: storedUserId,
+                startTime: job.updateAt,
+                cronExpression: job.cronExpression,
+                repeatIntervalMinutes: job.repeatIntervalMinutes,
+              }}
               onUpdated={() => queryClient.invalidateQueries({ queryKey: ['jobs'] })}
             />
 
-            <JobLogsModal jobId={String(job.id)} /> {/* 👈 로그 모달 */}
+            <JobLogsModal jobId={String(job.batchJobId)} />
 
             <button
               onClick={() => {
-                if (confirm('정말 삭제할까요?')) deleteJobMutation.mutate(String(job.id));
+                if (confirm('정말 삭제할까요?')) deleteJobMutation.mutate(String(job.batchJobId));
               }}
               className="text-red-500 hover:underline"
             >

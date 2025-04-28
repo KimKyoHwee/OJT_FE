@@ -4,8 +4,9 @@ export interface BatchJob {
   description: string;
   endpointUrl: string;
   userId: number;
-  createdAt: string;     // ISO 문자열 (예: '2025-04-19T02:00:00')
+  createdAt: string;
   updatedAt: string;
+  // (조회 DTO에 포함된 스케줄 정보가 있다면 아래처럼 추가)
 }
 
 
@@ -30,12 +31,29 @@ export interface BatchLog {
 }
 
 // types/job.ts
+// types/job.ts
+
 export interface CreateJobRequest {
   name: string;
   description?: string;
   endpointUrl: string;
   userId: number;
-  scheduleTime: string;            // ISO 형식 문자열
-  repeatIntervalMinutes?: number;  // 선택 값 (단발성도 가능)
+  startTime: string;          // ✅ 시작 시간 (ISO 8601)
+  cronExpression?: string;        // ✅ 선택적 (Cron 기반 스케줄)
+  repeatIntervalMinutes?: number; // ✅ 선택적 (분 단위 주기)
 }
+
+// 조회용 리스트 DTO
+export interface BatchJobListDto {
+  batchJobId: number;
+  name: string;
+  description?: string;
+  endpointUrl: string;
+  updateAt: string;             // 최근 배치 작업 실행 시간
+  nextExecutionTime: string;    // 다음 배치 수행 예정 시간
+  cronExpression?: string;      // Cron 표현식
+  repeatIntervalMinutes?: number;// 분 단위 반복 주기
+}
+
+
 
