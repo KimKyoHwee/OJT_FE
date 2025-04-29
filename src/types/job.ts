@@ -55,5 +55,15 @@ export interface BatchJobListDto {
   repeatIntervalMinutes?: number;// 분 단위 반복 주기
 }
 
+// types/job.ts
+
+export interface PageResponse<T> {
+  content: T[];        // 실제 아이템 배열
+  page: number;        // 0-based 페이지 번호
+  size: number;        // 요청한 페이지 크기
+  totalElements: number; // 전체 아이템 개수
+  totalPages: number;  // 전체 페이지 수
+}
+
 
 

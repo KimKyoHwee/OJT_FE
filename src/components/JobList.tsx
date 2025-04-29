@@ -39,6 +39,19 @@ export const JobList = () => {
           >
             {job.endpointUrl}
           </a>
+          <div className="ml-6 text-right text-xs text-gray-500 space-y-1">
+              <div>
+                최근 실행: {new Date(job.updateAt).toLocaleString()}
+              </div>
+              <div>
+                다음 예정: {new Date(job.nextExecutionTime).toLocaleString()}
+              </div>
+              {job.cronExpression ? (
+                <div>Cron: {job.cronExpression}</div>
+              ) : job.repeatIntervalMinutes != null ? (
+                <div>반복: {job.repeatIntervalMinutes}분</div>
+              ) : null}
+            </div>
 
           <div className="mt-4 flex gap-3">
             <button
