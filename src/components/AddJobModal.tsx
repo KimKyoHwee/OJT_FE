@@ -11,10 +11,11 @@ export const AddJobModal: React.FC = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [endpointUrl, setEndpointUrl] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [scheduleType, setScheduleType] = useState<'interval' | 'cron'>('interval'); // 스케줄 방식 선택
-  const [repeatIntervalMinutes, setRepeatIntervalMinutes] = useState<number | ''>(''); // 분 단위
+  const [jobType, setJobType] = useState<'REST' | 'SPRING_BATCH'>('REST');       // ← 추가
+  const [scheduleType, setScheduleType] = useState<'interval' | 'cron'>('interval');
+  const [repeatIntervalMinutes, setRepeatIntervalMinutes] = useState<number | ''>('');
   const [cronExpression, setCronExpression] = useState('');
+  const [startTime, setStartTime] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleAddJob = async () => {
@@ -38,7 +39,11 @@ export const AddJobModal: React.FC = () => {
         userId: Number(userId),
         startTime,
         cronExpression: scheduleType === 'cron' ? cronExpression : undefined,
-        repeatIntervalMinutes: scheduleType === 'interval' && repeatIntervalMinutes !== '' ? Number(repeatIntervalMinutes) : undefined,
+        repeatIntervalMinutes:
+          scheduleType === 'interval' && repeatIntervalMinutes !== ''
+            ? Number(repeatIntervalMinutes)
+            : undefined,
+        jobType,   // ← 추가
       };
 
       await jobService.createJob(payload);
@@ -62,12 +67,33 @@ export const AddJobModal: React.FC = () => {
           <DialogTitle className="text-xl mb-4">새 배치 작업 추가</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {/* 기본 정보 입력 */}
-          <Input placeholder="작업 이름" value={name} onChange={(e) => setName(e.target.value)} />
-          <Input placeholder="설명 (선택)" value={description} onChange={(e) => setDescription(e.target.value)} />
-          <Input placeholder="엔드포인트 URL" value={endpointUrl} onChange={(e) => setEndpointUrl(e.target.value)} />
+          {/* 1) Job Type 선택 */}
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="REST"
+                checked={jobType === 'REST'}
+                onChange={() => setJobType('REST')}
+              />
+              REST 호출
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="SPRING_BATCH"
+                checked={jobType === 'SPRING_BATCH'}
+                onChange={() => setJobType('SPRING_BATCH')}
+              />
+              Spring Batch
+            </label>
+          </div>
 
-          {/* 스케줄 타입 선택 */}
+          {/* 2) 나머지 기존 폼 */}
+          <Input placeholder="작업 이름" value={name} onChange={e => setName(e.target.value)} />
+          <Input placeholder="설명 (선택)" value={description} onChange={e => setDescription(e.target.value)} />
+          <Input placeholder="엔드포인트 URL" value={endpointUrl} onChange={e => setEndpointUrl(e.target.value)} />
+
           <div className="flex gap-4 text-sm">
             <label className="flex items-center gap-2">
               <input
@@ -87,31 +113,30 @@ export const AddJobModal: React.FC = () => {
             </label>
           </div>
 
-          {/* 공통: 시작 시간 */}
           <Input
             type="datetime-local"
             value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
+            onChange={e => setStartTime(e.target.value)}
           />
 
-          {/* 조건부 입력 */}
           {scheduleType === 'interval' && (
             <Input
               type="number"
               placeholder="반복 주기 (분) - 단발성은 비워두세요"
               value={repeatIntervalMinutes}
-              onChange={(e) => setRepeatIntervalMinutes(e.target.value === '' ? '' : Number(e.target.value))}
+              onChange={e =>
+                setRepeatIntervalMinutes(e.target.value === '' ? '' : Number(e.target.value))
+              }
             />
           )}
           {scheduleType === 'cron' && (
             <Input
               placeholder="Cron 표현식 (예: 0 0/5 * * * ?)"
               value={cronExpression}
-              onChange={(e) => setCronExpression(e.target.value)}
+              onChange={e => setCronExpression(e.target.value)}
             />
           )}
 
-          {/* 추가 버튼 */}
           <Button onClick={handleAddJob} disabled={loading} className="w-full mt-2">
             {loading ? '추가 중...' : '추가하기'}
           </Button>

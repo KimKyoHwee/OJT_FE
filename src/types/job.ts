@@ -38,9 +38,10 @@ export interface CreateJobRequest {
   description?: string;
   endpointUrl: string;
   userId: number;
-  startTime: string;          // ✅ 시작 시간 (ISO 8601)
-  cronExpression?: string;        // ✅ 선택적 (Cron 기반 스케줄)
-  repeatIntervalMinutes?: number; // ✅ 선택적 (분 단위 주기)
+  startTime: string;
+  cronExpression?: string;
+  repeatIntervalMinutes?: number;
+  jobType: 'REST' | 'SPRING_BATCH';   // ← 필수!
 }
 
 // 조회용 리스트 DTO
@@ -49,10 +50,12 @@ export interface BatchJobListDto {
   name: string;
   description?: string;
   endpointUrl: string;
+  jobType: 'REST' | 'SPRING_BATCH';  // 추가: job type
+  startTime: string;                // 추가: 원본 시작 시간
   updateAt: string;             // 최근 배치 작업 실행 시간
   nextExecutionTime: string;    // 다음 배치 수행 예정 시간
   cronExpression?: string;      // Cron 표현식
-  repeatIntervalMinutes?: number;// 분 단위 반복 주기
+  repeatIntervalMinutes?: number; // 분 단위 반복 주기
 }
 
 // types/job.ts

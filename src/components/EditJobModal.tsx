@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Dialog,
@@ -23,10 +23,13 @@ interface Props {
 export const EditJobModal: React.FC<Props> = ({ jobId, job, onUpdated }) => {
   const router = useRouter();
 
-  // 1. 모달 열림/닫힘 상태를 직접 관리
+  // 모달 열림/닫힘 상태
   const [open, setOpen] = useState(false);
 
-  // 2. 폼 필드 상태
+  // 1) Job Type 상태 추가
+  const [jobType, setJobType] = useState<'REST' | 'SPRING_BATCH'>(job.jobType);
+
+  // 2) 기존 폼 필드
   const [name, setName] = useState(job.name);
   const [description, setDescription] = useState(job.description || '');
   const [endpointUrl, setEndpointUrl] = useState(job.endpointUrl);
@@ -40,9 +43,10 @@ export const EditJobModal: React.FC<Props> = ({ jobId, job, onUpdated }) => {
   const [cronExpression, setCronExpression] = useState(job.cronExpression || '');
   const [loading, setLoading] = useState(false);
 
-  // 3. 만약 job prop 이 바뀔 가능성이 있다면, open 이 true 될 때마다 폼값 재설정
+  // 3) 열 때마다 폼 초기화
   useEffect(() => {
     if (open) {
+      setJobType(job.jobType);
       setName(job.name);
       setDescription(job.description || '');
       setEndpointUrl(job.endpointUrl);
@@ -53,7 +57,7 @@ export const EditJobModal: React.FC<Props> = ({ jobId, job, onUpdated }) => {
     }
   }, [open, job]);
 
-  // 4. 저장 핸들러: 성공 시 모달 닫고, 리스트 갱신 콜백, (원하면) 페이지 이동
+  // 업데이트 핸들러
   const handleUpdate = async () => {
     if (!name || !endpointUrl || !startTime) {
       alert('필수 입력값을 모두 채워주세요.');
@@ -66,22 +70,20 @@ export const EditJobModal: React.FC<Props> = ({ jobId, job, onUpdated }) => {
         name,
         description,
         endpointUrl,
+        userId: job.userId,
+        jobType, // 추가된 필드
         startTime,
         cronExpression: scheduleType === 'cron' ? cronExpression : undefined,
         repeatIntervalMinutes:
           scheduleType === 'interval' && repeatIntervalMinutes !== ''
             ? Number(repeatIntervalMinutes)
             : undefined,
-        userId: job.userId,
       };
 
       await jobService.updateJob(jobId, payload);
 
-      onUpdated();    // 부모에서 query invalidation 혹은 state refresh
-      setOpen(false); // 모달 닫기
-
-      // (선택) 진짜 다른 페이지로 돌아가고 싶다면:
-      // router.push('/');
+      onUpdated();
+      setOpen(false);
     } catch (err: any) {
       console.error('수정 실패:', err);
       const msg = err.response?.data?.message || err.message;
@@ -102,6 +104,29 @@ export const EditJobModal: React.FC<Props> = ({ jobId, job, onUpdated }) => {
         </DialogHeader>
 
         <div className="space-y-4 mt-2">
+          {/* Job Type 선택 */}
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="REST"
+                checked={jobType === 'REST'}
+                onChange={() => setJobType('REST')}
+              />
+              REST 호출
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="SPRING_BATCH"
+                checked={jobType === 'SPRING_BATCH'}
+                onChange={() => setJobType('SPRING_BATCH')}
+              />
+              Spring Batch
+            </label>
+          </div>
+
+          {/* 나머지 입력 폼 */}
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
